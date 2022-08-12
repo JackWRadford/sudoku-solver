@@ -1,0 +1,6 @@
+/* Only if browser supports non-emulated hovering (mouse) */
+@mixin hover() {
+  @media (hover: hover) {
+    @content;
+  }
+}

@@ -1,0 +1,23 @@
+@use "../styles/colours";
+@import "mixins";
+
+.actions {
+  display: flex;
+  justify-content: center;
+  padding: 1rem 0;
+}
+
+.solveBtn {
+  font: inherit;
+  background-color: colours.$colour-purple;
+  padding: 1rem 2rem;
+  margin: 0 1rem;
+  border: none;
+  border-radius: 4px;
+}
+
+@include hover() {
+  .solveBtn:hover {
+    box-shadow: 0 2px 8px colours.$colour-purple;
+  }
+}
