@@ -18,36 +18,37 @@ import { GridDataType, PointType, ResultType } from "../types/types";
 //   [0, 0, 0, 0, 0, 0, 0, 0, 0],
 // ];
 
-// let initGridData: GridDataType = [
-//   [0, 9, 0, 7, 5, 1, 2, 3, 0],
-//   [2, 1, 8, 0, 0, 3, 5, 0, 0],
-//   [0, 0, 0, 4, 0, 0, 0, 0, 1],
-//   [0, 4, 0, 0, 3, 0, 7, 0, 2],
-//   [0, 0, 0, 0, 7, 6, 4, 8, 9],
-//   [0, 0, 0, 9, 0, 0, 0, 0, 6],
-//   [0, 6, 2, 5, 1, 4, 8, 0, 3],
-//   [3, 7, 0, 0, 0, 0, 1, 6, 5],
-//   [1, 0, 0, 0, 0, 7, 0, 0, 0],
-// ];
-
-// An 'evil' level Sudoku.com
 let initGridData: GridDataType = [
-  [0, 0, 0, 0, 6, 0, 0, 0, 0],
-  [0, 0, 8, 0, 0, 0, 3, 0, 0],
-  [5, 0, 0, 1, 0, 7, 0, 0, 9],
-  [0, 0, 0, 4, 0, 0, 0, 0, 0],
-  [1, 0, 0, 9, 0, 2, 0, 0, 7],
-  [0, 5, 0, 0, 0, 0, 0, 1, 0],
-  [0, 3, 0, 2, 0, 6, 9, 0, 0],
-  [0, 0, 0, 0, 5, 0, 0, 0, 6],
-  [2, 0, 0, 0, 4, 0, 0, 0, 0],
+  [0, 9, 0, 7, 5, 1, 2, 3, 0],
+  [2, 1, 8, 0, 0, 3, 5, 0, 0],
+  [0, 0, 0, 4, 0, 0, 0, 0, 1],
+  [0, 4, 0, 0, 3, 0, 7, 0, 2],
+  [0, 0, 0, 0, 7, 6, 4, 8, 9],
+  [0, 0, 0, 9, 0, 0, 0, 0, 6],
+  [0, 6, 2, 5, 1, 4, 8, 0, 3],
+  [3, 7, 0, 0, 0, 0, 1, 6, 5],
+  [1, 0, 0, 0, 0, 7, 0, 0, 0],
 ];
+
+// // An 'evil' level Sudoku.com
+// let initGridData: GridDataType = [
+//   [0, 0, 0, 0, 6, 0, 0, 0, 0],
+//   [0, 0, 8, 0, 0, 0, 3, 0, 0],
+//   [5, 0, 0, 1, 0, 7, 0, 0, 9],
+//   [0, 0, 0, 4, 0, 0, 0, 0, 0],
+//   [1, 0, 0, 9, 0, 2, 0, 0, 7],
+//   [0, 5, 0, 0, 0, 0, 0, 1, 0],
+//   [0, 3, 0, 2, 0, 6, 9, 0, 0],
+//   [0, 0, 0, 0, 5, 0, 0, 0, 6],
+//   [2, 0, 0, 0, 4, 0, 0, 0, 0],
+// ];
 
 const Home: NextPage = () => {
   const [gridData, setGridData] = useState<GridDataType>(initGridData);
   const [result, setResult] = useState<ResultType>({
     done: false,
     solved: false,
+    tooFewHints: false,
   });
   let solutionData: GridDataType = [[]];
 
@@ -87,7 +88,19 @@ const Home: NextPage = () => {
       }
     }
     setGridData(solutionData.map((arr) => arr.slice()));
-    setResult({ done: true, solved: true });
+    setResult({ done: true, solved: true, tooFewHints: false });
+  };
+
+  // Check number of initial hints
+  const enoughHints = () => {
+    let required = 17;
+    gridData.forEach((row) =>
+      row.forEach((e) => {
+        if (e !== 0) required--;
+        if (required <= 0) return true;
+      })
+    );
+    return required <= 0;
   };
 
   // Update gridData when a value is changed
@@ -101,23 +114,28 @@ const Home: NextPage = () => {
       newData[point.y][point.x] = +e.target.value;
       return newData;
     });
-    setResult({ done: false, solved: false });
+    setResult({ done: false, solved: false, tooFewHints: false });
   };
 
   // Attempt to solve puzzle (back-tracking)
   const onSolveHandler = () => {
-    setResult({ done: false, solved: false });
+    setResult({ done: false, solved: false, tooFewHints: false });
+    // Check gridData has atleast 17 initial hints
+    if (!enoughHints()) {
+      setResult({ done: true, solved: false, tooFewHints: true });
+      return;
+    }
     solutionData = gridData.map((arr) => arr.slice());
     solve();
     setResult((prev) => {
-      return { done: true, solved: prev.solved };
+      return { done: true, solved: prev.solved, tooFewHints: false };
     });
   };
 
   // Reset gridData to all zero
   const onResetHandler = () => {
     setGridData(initGridData.map((arr) => arr.slice()));
-    setResult({ done: false, solved: false });
+    setResult({ done: false, solved: false, tooFewHints: false });
   };
 
   return (
@@ -125,7 +143,7 @@ const Home: NextPage = () => {
       <div className={styles.home}>
         <h1>Sudoku Solver</h1>
         <SudokuGrid gridData={gridData} onChange={onChangeHandler} />
-        <Message done={result.done} solved={result.solved} />
+        <Message {...result} />
         <Actions onSolve={onSolveHandler} onReset={onResetHandler} />
       </div>
     </div>

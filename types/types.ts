@@ -1,6 +1,7 @@
 export type ResultType = {
   done: boolean;
   solved: boolean;
+  tooFewHints: boolean;
 };
 
 export type GridDataType = number[][];
