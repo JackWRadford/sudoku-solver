@@ -8,12 +8,8 @@ type ActionsType = {
 const Actions: React.FC<ActionsType> = (props) => {
   return (
     <div className={styles.actions}>
-      <button className={styles.solveBtn} onClick={props.onSolve}>
-        Solve
-      </button>
-      <button className={styles.solveBtn} onClick={props.onReset}>
-        Reset
-      </button>
+      <button onClick={props.onSolve}>Solve</button>
+      <button onClick={props.onReset}>Reset</button>
     </div>
   );
 };
