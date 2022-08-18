@@ -6,7 +6,6 @@ export default function Document() {
       <Head />{" "}
       <body>
         <Main />
-        <div id="overlays"></div> {/* To portal elements */}
         <NextScript />
       </body>
     </Html>
